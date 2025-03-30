@@ -36,6 +36,10 @@ int main(void){
     get_output_perceptron(&perceptron, input2, 2);
     get_output_perceptron(&perceptron, input3, 2);
 
+    printf("Sigmoid(0) = %f\n", calculate_activation_sigmoid_function(0));  // Doit être proche de 0.5
+    printf("Sigmoid(-5) = %f\n", calculate_activation_sigmoid_function(-5));  // Doit être proche de 0
+    printf("Sigmoid(5) = %f\n", calculate_activation_sigmoid_function(5));  // Doit être proche de 1
+
 
     //FREE
     free_perceptron(&perceptron);

@@ -47,20 +47,6 @@ void free_perceptron(Perceptron* perceptron){
 
 // CALCULATE_ACTIVATION ____
 
-double calculate_activation_function(double weighted_sum,
-ActivationFunction fun){
-    switch (fun){
-    case ACTIVATION_STEP:
-        return calculate_activation_step_function(weighted_sum);
-    case ACTIVATION_LINEAR:
-        return calculate_activation_linear_function(weighted_sum);
-    default:
-        fprintf(stderr, "Erreur: Fonction d'activation non supportée.\n");
-        exit(1);
-    }
-}
-    
-
 int calculate_activation_step_function(double weighted_sum){
     return (weighted_sum > 0) ? 1 : 0;
 }
@@ -68,6 +54,27 @@ int calculate_activation_step_function(double weighted_sum){
 
 int calculate_activation_linear_function(double weighted_sum){
     return weighted_sum;
+}
+
+
+double calculate_activation_sigmoid_function(double weighted_sum){
+    return (1/(1+exp(-weighted_sum)));
+}
+
+
+double calculate_activation_function(double weighted_sum,
+ActivationFunction fun){
+    switch (fun){
+    case ACTIVATION_STEP:
+        return calculate_activation_step_function(weighted_sum);
+    case ACTIVATION_LINEAR:
+        return calculate_activation_linear_function(weighted_sum);
+    case ACTIVATION_SIGMOID:
+        return calculate_activation_sigmoid_function(weighted_sum);
+    default:
+        fprintf(stderr, "Erreur: Fonction d'activation non supportée.\n");
+        exit(1);
+    }
 }
 
 

@@ -4,6 +4,7 @@
 typedef enum{
     ACTIVATION_STEP,
     ACTIVATION_LINEAR,
+    ACTIVATION_SIGMOID,
 } ActivationFunction;
 
 typedef struct {
@@ -41,6 +42,8 @@ void free_perceptron(Perceptron *perceptron);
 int calculate_activation_step_function(double weighted_sum);
 
 int calculate_activation_linear_function(double weighted_sum);
+
+double calculate_activation_sigmoid_function(double weighted_sum);
 
 double calculate_activation_function(double weighted_sum,
     ActivationFunction fun);
