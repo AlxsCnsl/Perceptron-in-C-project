@@ -7,9 +7,12 @@ typedef struct {
     double bias;
 }Perceptron;
 
-Perceptron makePerceptron(int w_size, double b, int range);
-void randomWeightInit(double *weights, int w_size, int range); //test de retiré du main pour voir ce que ça fait
-void printPerceptron(Perceptron *perceptron);
-void freePerceptron(Perceptron *perceptron);
+Perceptron make_perceptron(int w_size, double b, int range);
+void random_weight_init(double *weights, int w_size, int range);
+void print_perceptron(Perceptron *perceptron);
+void free_perceptron(Perceptron *perceptron);
 
+//inferences
+double compute_weighted_sum(Perceptron* p, double inputs[], int i_size);
+void check_inputs(Perceptron* p, double inputs[], int i_size);
 #endif

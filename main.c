@@ -5,7 +5,7 @@
 
 int main(void){
     srand(time(NULL));
-    Perceptron perceptron = makePerceptron(10, 1.0, 1);
-    printPerceptron(&perceptron);
-    freePerceptron(&perceptron);
+    Perceptron perceptron = make_perceptron(10, 1.0, 1);
+    print_perceptron(&perceptron);
+    free_perceptron(&perceptron);
 }
