@@ -10,6 +10,7 @@ typedef struct {
     int weights_size;
     double *weights;//pointeur vers les poids
     double bias;
+    ActivationFunction act_fun;
 }Perceptron;
 
 typedef struct{
@@ -27,7 +28,7 @@ typedef struct{
 
 
 //INIT AND FREE ____
-Perceptron make_perceptron(int w_size, double b, int range);
+Perceptron make_perceptron(int w_size, double b, int range, ActivationFunction act_fun);
 
 void random_weight_init(double *weights, int w_size, int range);
 
@@ -51,9 +52,9 @@ double learning_rate, double epsilon);
 
 Dataset new_dataset(double* inputs, int row_size, int column_size,  double* expected_outputs);
 
-int trainPerceptron(Perceptron* p, Dataset data, TrainingConfig conf, ActivationFunction fun);
+int trainPerceptron(Perceptron* p, Dataset data, TrainingConfig conf);
 
-void multiTrainPerceptron(Perceptron* p, Dataset data, TrainingConfig conf, ActivationFunction fun);
+void multiTrainPerceptron(Perceptron* p, Dataset data, TrainingConfig conf);
 
 double compute_weighted_sum(Perceptron* p, double inputs[], int i_size);
 
@@ -69,7 +70,7 @@ double** make_data_inputs(double* data_inputs, int row_size, int column_size);
 
 
 //PROMPTE ___
-double give_resulte_prompt(Perceptron* p, double input[], int i_size, ActivationFunction fun);
+double get_output_perceptron(Perceptron* p, double input[], int i_size);
 
 char* input_prompt_str(double input[], int size);
 

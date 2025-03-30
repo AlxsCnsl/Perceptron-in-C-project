@@ -8,7 +8,7 @@
 
 //INIT AND FREE____
 
-Perceptron make_perceptron(int w_size, double b, int range){
+Perceptron make_perceptron(int w_size, double b, int range, ActivationFunction act_fun){
     double *w = (double*)malloc(w_size * sizeof(double));
     random_weight_init(w, w_size, range);
     Perceptron perceptron;
@@ -16,6 +16,7 @@ Perceptron make_perceptron(int w_size, double b, int range){
     perceptron.weights_size = w_size;
     perceptron.bias = b;
     perceptron.weights = w;
+    perceptron.act_fun = act_fun;
     return perceptron;
 }
 
@@ -93,11 +94,11 @@ Dataset new_dataset(double* inputs, int row_size, int column_size,  double* expe
 }
 
 
-int trainPerceptron(Perceptron* p, Dataset data, TrainingConfig conf, ActivationFunction fun){
+int trainPerceptron(Perceptron* p, Dataset data, TrainingConfig conf){
     int i, y, win = 0;;
     for(i = 0; i< data.size; i++){
         double weighted_sum = compute_weighted_sum( p, data.inputs[i], p->weights_size );
-        double actual_output = calculate_activation_function(weighted_sum, fun);
+        double actual_output = calculate_activation_function(weighted_sum, p->act_fun);
         if(!compare_outputs(actual_output, data.expected_outputs[i], conf.epsilon)){
             for(y=0; y < p->weights_size; y++){
                 printf("lose\n");
@@ -115,12 +116,12 @@ int trainPerceptron(Perceptron* p, Dataset data, TrainingConfig conf, Activation
     return 0;
 }
 
-void multiTrainPerceptron(Perceptron* p, Dataset data, TrainingConfig conf, ActivationFunction fun){
+void multiTrainPerceptron(Perceptron* p, Dataset data, TrainingConfig conf){
     int win_counter = 0; 
     int i;
     for(i = 0; i< conf.time; i ++){
         printf("TIME = %d/%d", i, conf.time);
-        if(trainPerceptron(p, data, conf, fun) == 1){
+        if(trainPerceptron(p, data, conf) == 1){
             win_counter ++;
         }else{
             win_counter = 0;
@@ -189,10 +190,10 @@ double** make_data_inputs(double* data_inputs,  int row_size, int column_size) {
 
 //PROMPT
 
-double give_resulte_prompt(Perceptron* p, double input[], int i_size, ActivationFunction fun){
+double get_output_perceptron(Perceptron* p, double input[], int i_size){
     int i;
     double weighted_sum = compute_weighted_sum( p, input, p->weights_size );
-    double output = calculate_activation_function(weighted_sum, fun);
+    double output = calculate_activation_function(weighted_sum, p->act_fun);
     printf("input > [%s]/ output > %f\n", input_prompt_str(input, i_size), output );
     return output;
 }
