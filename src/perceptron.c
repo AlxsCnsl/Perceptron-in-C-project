@@ -5,6 +5,9 @@
 #include"../include/perceptron.h"
 #include"../include/malloctools.h"
 
+
+//INIT AND FREE____
+
 Perceptron make_perceptron(int w_size, double b, int range){
     double *w = (double*)malloc(w_size * sizeof(double));
     random_weight_init(w, w_size, range);
@@ -16,7 +19,6 @@ Perceptron make_perceptron(int w_size, double b, int range){
     return perceptron;
 }
 
-//INIT AND FREE____
 
 void random_weight_init(double* weights, int w_size, int range) {
     int i;
@@ -39,6 +41,7 @@ void print_perceptron(Perceptron* perceptron){
 void free_perceptron(Perceptron* perceptron){
     free(perceptron->weights);
 }
+
 
 
 // CALCULATE_ACTIVATION ____
@@ -66,6 +69,8 @@ int calculate_activation_linear_function(double weighted_sum){
     return weighted_sum;
 }
 
+
+
 // TRAINING ____
 
 TrainingConfig new_training_config(int time, int max_win,
@@ -78,23 +83,31 @@ double learning_rate, double epsilon){
     return conf;
 }
 
-int trainPerceptron(Perceptron* p, double** data_inputs, 
-double expected_output[], int d_i_size, 
-TrainingConfig conf, ActivationFunction fun){
+
+Dataset new_dataset(double* inputs, int row_size, int column_size,  double* expected_outputs){
+    Dataset data;
+    data.inputs = make_data_inputs(inputs, row_size, column_size);
+    data.size = row_size;
+    data.expected_outputs = expected_outputs;
+    return data;
+}
+
+
+int trainPerceptron(Perceptron* p, Dataset data, TrainingConfig conf, ActivationFunction fun){
     int i, y, win = 0;;
-    for(i = 0; i< d_i_size; i++){
-        double weighted_sum = compute_weighted_sum( p, data_inputs[i], p->weights_size );
+    for(i = 0; i< data.size; i++){
+        double weighted_sum = compute_weighted_sum( p, data.inputs[i], p->weights_size );
         double actual_output = calculate_activation_function(weighted_sum, fun);
-        if(!compare_outputs(actual_output, expected_output[i], conf.epsilon)){
+        if(!compare_outputs(actual_output, data.expected_outputs[i], conf.epsilon)){
             for(y=0; y < p->weights_size; y++){
                 printf("lose\n");
-                adjust_weights_bias(p, y, conf.learning_rate, data_inputs[i], expected_output[i], actual_output);
+                adjust_weights_bias(p, y, conf.learning_rate, data.inputs[i], data.expected_outputs[i], actual_output);
             }
         }else{
             printf("win\n");
             win ++;
         }
-    } double winrate = (win / d_i_size) * 100;
+    } double winrate = (win / data.size) * 100;
     printf("WINRATE : %f %%\n", winrate);
     if(winrate == 100.0){
         return 1;
@@ -102,13 +115,12 @@ TrainingConfig conf, ActivationFunction fun){
     return 0;
 }
 
-void multiTrainPerceptron(Perceptron* p, double** data,
-double expected_output[], int data_size, 
-TrainingConfig conf, ActivationFunction fun){
+void multiTrainPerceptron(Perceptron* p, Dataset data, TrainingConfig conf, ActivationFunction fun){
     int win_counter = 0; 
     int i;
     for(i = 0; i< conf.time; i ++){
-        if(trainPerceptron(p, data, expected_output, data_size, conf, fun) == 1){
+        printf("TIME = %d/%d", i, conf.time);
+        if(trainPerceptron(p, data, conf, fun) == 1){
             win_counter ++;
         }else{
             win_counter = 0;
@@ -160,23 +172,22 @@ double epsilon){
 }
 
 
-double** make_data_inputs(double* data_inputs, int size1, int size2) {
-    double** data_inputs_remake = (double**)malloc(size1 * sizeof(double*));
-    for (int i = 0; i < size1; i++) {
-        data_inputs_remake[i] = (double*)malloc(size2 * sizeof(double));
+double** make_data_inputs(double* data_inputs,  int row_size, int column_size) {
+    double** data_inputs_remake = (double**)malloc(row_size * sizeof(double*));
+    for (int i = 0; i < row_size; i++) {
+        data_inputs_remake[i] = (double*)malloc(column_size * sizeof(double));
     }
-    for (int i = 0; i < size1; i++) {
-        for (int j = 0; j < size2; j++) {
-            data_inputs_remake[i][j] = data_inputs[i * size2 + j];
+    for (int i = 0; i < row_size; i++) {
+        for (int j = 0; j < column_size; j++) {
+            data_inputs_remake[i][j] = data_inputs[i * column_size + j];
         }
     }
     return data_inputs_remake;
 }
 
 
+
 //PROMPT
-
-
 
 double give_resulte_prompt(Perceptron* p, double input[], int i_size, ActivationFunction fun){
     int i;
@@ -205,7 +216,3 @@ char* input_prompt_str(double input[], int size){
     }
     return result;
 }
-
-
-
-

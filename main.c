@@ -7,27 +7,27 @@ int main(void){
     srand(time(NULL));
 
     //DATA
-    int size1 = 4, size2 =2;
+    int row_size = 4, column_size =2;
     double data_inputs[] = {
         0, 0,  //ligne1
         0, 1,  //ligne2
         1, 0,  //...
         1, 1,
     };
-    double** new_data = make_data_inputs(data_inputs, size1, size2);
 
     double expected_output[4] = {0, 1, 1, 1};
 
+    Dataset data = new_dataset(data_inputs, row_size, column_size, expected_output);
 
+    //TRAINING
     Perceptron perceptron = make_perceptron(2, 0, 1);
     print_perceptron(&perceptron);
-
     TrainingConfig conf = new_training_config(1000, 100, 0.01, 0.1);
-    multiTrainPerceptron(&perceptron, new_data, expected_output, 4, conf, ACTIVATION_STEP);
-
+    multiTrainPerceptron(&perceptron, data, conf, ACTIVATION_STEP);
     print_perceptron(&perceptron);
 
-    //trainPerceptron(&perceptron, new_data, expected_output, 4,  0.1, 0.01, ACTIVATION_STEP);
+
+    //TEST
     printf ("test manuel avec des data : \n");
     double input1[2] = {1, 1};
     double input2[2] = {0, 1};
@@ -38,6 +38,6 @@ int main(void){
 
 
 
-
+    //FREE
     free_perceptron(&perceptron);
 }
