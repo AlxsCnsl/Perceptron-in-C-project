@@ -12,6 +12,13 @@ typedef struct {
     double bias;
 }Perceptron;
 
+typedef struct{
+    int time;
+    int max_win;
+    double learning_rate;
+    double epsilon;
+}TrainingConfig;
+
 
 //INIT AND FREE ____
 Perceptron make_perceptron(int w_size, double b, int range);
@@ -33,9 +40,16 @@ double calculate_activation_function(double weighted_sum,
 
 
 // TRAINING ____
+TrainingConfig new_training_config(int time, int max_win,
+double learning_rate, double epsilon);
+
 int trainPerceptron(Perceptron* p, double** data_inputs, 
-    double expected_output[], int d_i_size, double learning_rate,
-    double epsilon, ActivationFunction fun);
+    double expected_output[], int d_i_size, 
+    TrainingConfig conf, ActivationFunction fun);
+
+void multiTrainPerceptron(Perceptron* p, double** data,
+    double expected_output[], int data_size, 
+    TrainingConfig conf, ActivationFunction fun);
 
 double compute_weighted_sum(Perceptron* p, double inputs[], int i_size);
 

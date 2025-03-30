@@ -44,17 +44,17 @@ void free_perceptron(Perceptron* perceptron){
 // CALCULATE_ACTIVATION ____
 
 double calculate_activation_function(double weighted_sum,
-    ActivationFunction fun){
-        switch (fun){
-        case ACTIVATION_STEP:
-            return calculate_activation_step_function(weighted_sum);
-        case ACTIVATION_LINEAR:
-            return calculate_activation_linear_function(weighted_sum);
-        default:
-            fprintf(stderr, "Erreur: Fonction d'activation non supportée.\n");
-            exit(1);
-        }
+ActivationFunction fun){
+    switch (fun){
+    case ACTIVATION_STEP:
+        return calculate_activation_step_function(weighted_sum);
+    case ACTIVATION_LINEAR:
+        return calculate_activation_linear_function(weighted_sum);
+    default:
+        fprintf(stderr, "Erreur: Fonction d'activation non supportée.\n");
+        exit(1);
     }
+}
     
 
 int calculate_activation_step_function(double weighted_sum){
@@ -68,30 +68,56 @@ int calculate_activation_linear_function(double weighted_sum){
 
 // TRAINING ____
 
-int trainPerceptron(Perceptron* p, double** data_inputs, 
-    double expected_output[], int d_i_size, double learning_rate,
-    double epsilon, ActivationFunction fun){
-        int i, y, win = 0;;
-        for(i = 0; i< d_i_size; i++){
-            double weighted_sum = compute_weighted_sum( p, data_inputs[i], p->weights_size );
-            double actual_output = calculate_activation_function(weighted_sum, fun);
-            if(!compare_outputs(actual_output, expected_output[i], epsilon)){
-                for(y=0; y < p->weights_size; y++){
-                    printf("lose\n");
-                    adjust_weights_bias(p, y, learning_rate, data_inputs[i], expected_output[i], actual_output);
-                }
-            }else{
-                printf("win\n");
-                win ++;
-            }
-        } double winrate = (win / d_i_size) * 100;
-        printf("WINRATE : %f %%\n", winrate);
-        if(winrate == 100.0){
-            return 1;
-        }
-        return 0;
-    }
+TrainingConfig new_training_config(int time, int max_win,
+double learning_rate, double epsilon){
+    TrainingConfig conf;
+    conf.time = time;
+    conf.max_win = max_win;
+    conf.learning_rate = learning_rate;
+    conf.epsilon = epsilon;
+    return conf;
+}
 
+int trainPerceptron(Perceptron* p, double** data_inputs, 
+double expected_output[], int d_i_size, 
+TrainingConfig conf, ActivationFunction fun){
+    int i, y, win = 0;;
+    for(i = 0; i< d_i_size; i++){
+        double weighted_sum = compute_weighted_sum( p, data_inputs[i], p->weights_size );
+        double actual_output = calculate_activation_function(weighted_sum, fun);
+        if(!compare_outputs(actual_output, expected_output[i], conf.epsilon)){
+            for(y=0; y < p->weights_size; y++){
+                printf("lose\n");
+                adjust_weights_bias(p, y, conf.learning_rate, data_inputs[i], expected_output[i], actual_output);
+            }
+        }else{
+            printf("win\n");
+            win ++;
+        }
+    } double winrate = (win / d_i_size) * 100;
+    printf("WINRATE : %f %%\n", winrate);
+    if(winrate == 100.0){
+        return 1;
+    }
+    return 0;
+}
+
+void multiTrainPerceptron(Perceptron* p, double** data,
+double expected_output[], int data_size, 
+TrainingConfig conf, ActivationFunction fun){
+    int win_counter = 0; 
+    int i;
+    for(i = 0; i< conf.time; i ++){
+        if(trainPerceptron(p, data, expected_output, data_size, conf, fun) == 1){
+            win_counter ++;
+        }else{
+            win_counter = 0;
+        }
+        if(win_counter == conf.max_win){
+            break;
+        }
+    }
+}
 
 double compute_weighted_sum(Perceptron* p, double inputs[], int i_size){
     double S = 0.0;
