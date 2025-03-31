@@ -5,25 +5,34 @@ typedef enum{
     ACTIVATION_STEP,
     ACTIVATION_LINEAR,
     ACTIVATION_SIGMOID,
-} ActivationType;
+}ActivationType;
+
+typedef enum{
+    GRADIENT_DESCENT,
+    ADAM,
+}WeightUpdateType;
 
 typedef struct{
-    double (*activation)(double);
-    double (*activation_prime)(double);
+    double (*activation)(double x);
+    double (*activation_prime)(double x);
 }ActivationFunction;
 
 typedef struct {
     int num_weights;
-    double *weights;
+    double *weights;//Inputs tab
     double bias;
     ActivationFunction act_fun;
 }Perceptron;
+
+typedef void (*WeightUpdateFunction)(Perceptron* p, int w_index, double learning_rate,
+    double input[],  double expected_output, double actual_output);
 
 typedef struct{
     int epoch;
     int max_win;
     double learning_rate;
     double epsilon;
+    WeightUpdateFunction function;
 }TrainingConfig;
 
 typedef struct{
@@ -34,9 +43,9 @@ typedef struct{
 
 
 //INIT AND FREE ____
-Perceptron make_perceptron(int num_weights, double b, int range_weight, ActivationType act_type); //USED
+Perceptron make_perceptron(int num_weights, double b, int range_weight, ActivationType act_type);
 
-ActivationFunction init_activation_function(ActivationType act_type);//NEW
+ActivationFunction init_activation_function(ActivationType act_type);
 
 void random_weight_init(double *weights, int num_weights, int range);
 
@@ -61,7 +70,9 @@ double linear_prime(double x);
 
 // TRAINING ____
 TrainingConfig new_training_config(int epoch, int max_win,
-double learning_rate, double epsilon);
+    double learning_rate, double epsilon, WeightUpdateType w_update);
+
+WeightUpdateFunction define_weight_update_function(WeightUpdateType w_update);
 
 Dataset new_dataset(double* inputs, int row_size, int column_size,  double* expected_outputs);
 
@@ -73,7 +84,7 @@ double compute_weighted_sum(Perceptron* p, double inputs[], int i_size);
 
 void check_inputs_outputs(Perceptron* p, double xputs[], int i_size);
 
-void adjust_weights_bias(Perceptron* p, int w_index, double learning_rate,
+void adjust_weights_gradient_descent(Perceptron* p, int w_index, double learning_rate,
     double input[],  double expected_output, double actual_output );
 
 int compare_outputs(double expected_output, double actual_output,

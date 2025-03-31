@@ -36,7 +36,7 @@ int main(void){
     //TRAINING_______________________________________________________________________________
     Perceptron perceptron = make_perceptron(1, 0, 0.1, ACTIVATION_LINEAR);
     print_perceptron(&perceptron);
-    TrainingConfig conf = new_training_config(10000000, 100, 0.001, 0.0001);
+    TrainingConfig conf = new_training_config(10000000, 100, 0.001, 0.0001, GRADIENT_DESCENT);
     multiTrainPerceptron(&perceptron, data, conf);
     print_perceptron(&perceptron);
 

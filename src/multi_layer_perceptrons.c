@@ -10,7 +10,7 @@ MLP new_mlp(int num_layers, Neuron** perceptrons, int* perceptron_per_layer, Act
     mlp.perceptron_per_layer = perceptron_per_layer;
     mlp.function_layers = init_function_layers(function_layers, num_layers);
     mlp.perceptrons = (Perceptron**)malloc(sizeof(Perceptron**));
-    //int_perceptrons(&mlp);
+    //int_mlp_perceptrons(&mlp);
     return mlp;
 }
 

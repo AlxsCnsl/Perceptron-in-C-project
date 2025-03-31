@@ -97,14 +97,28 @@ double linear_prime(double x) {
 // TRAINING ____
 
 TrainingConfig new_training_config(int epoch, int max_win,
-double learning_rate, double epsilon){
+double learning_rate, double epsilon, WeightUpdateType w_update){
     TrainingConfig conf;
     conf.epoch = epoch;
     conf.max_win = max_win;
     conf.learning_rate = learning_rate;
     conf.epsilon = epsilon;
+    conf.function = define_weight_update_function(w_update);
     return conf;
 }
+
+WeightUpdateFunction define_weight_update_function(WeightUpdateType w_update){
+    switch (w_update)
+    {
+    case GRADIENT_DESCENT:
+        return adjust_weights_gradient_descent;
+        break;
+    default:
+        fprintf(stderr, "Erreur: Fonction d'ajustement du poids non supportée.\n");
+        exit(1);
+    }
+}
+
 
 
 Dataset new_dataset(double* inputs, int row_size, int column_size,  double* expected_outputs){// À MODIFIER / RETIRER APRES MODIFS
@@ -124,7 +138,7 @@ int trainPerceptron(Perceptron* p, Dataset data, TrainingConfig conf){
         if(!compare_outputs(actual_output, data.expected_outputs[i], conf.epsilon)){
             for(y=0; y < p->num_weights; y++){
                 printf("lose\n");
-                adjust_weights_bias(p, y, conf.learning_rate, data.inputs[i], data.expected_outputs[i], actual_output);
+                conf.function(p, y, conf.learning_rate, data.inputs[i], data.expected_outputs[i], actual_output);
             }
         }else{
             printf("win\n");
@@ -179,7 +193,7 @@ void check_inputs_outputs(Perceptron* p, double xputs[], int x_size){//à modifi
 }
 
 
-void adjust_weights_bias(Perceptron* p, int w_index, double learning_rate,
+void adjust_weights_gradient_descent(Perceptron* p, int w_index, double learning_rate,
 double input[],  double expected_output, double actual_output){
     double delta = (expected_output - actual_output);
     double prime = p->act_fun.activation_prime(actual_output);
@@ -188,9 +202,6 @@ double input[],  double expected_output, double actual_output){
 }
 
 
-
-
-    
 int compare_outputs(double expected_output, double actual_output,
 double epsilon){
     if(fabs(actual_output - expected_output)<epsilon){
