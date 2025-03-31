@@ -8,14 +8,14 @@ typedef enum{
 } ActivationFunction;
 
 typedef struct {
-    int weights_size;
-    double *weights;//pointeur vers les poids
+    int num_weights;
+    double *weights;
     double bias;
     ActivationFunction act_fun;
 }Perceptron;
 
 typedef struct{
-    int time;
+    int epoch;
     int max_win;
     double learning_rate;
     double epsilon;
@@ -29,9 +29,9 @@ typedef struct{
 
 
 //INIT AND FREE ____
-Perceptron make_perceptron(int w_size, double b, int range, ActivationFunction act_fun);
+Perceptron make_perceptron(int num_weights, double b, int range_weight, ActivationFunction act_fun);
 
-void random_weight_init(double *weights, int w_size, int range);
+void random_weight_init(double *weights, int num_weights, int range);
 
 void print_perceptron(Perceptron *perceptron);
 
@@ -41,7 +41,7 @@ void free_perceptron(Perceptron *perceptron);
 // CALCULATE_ACTIVATION ____
 int calculate_activation_step_function(double weighted_sum);
 
-int calculate_activation_linear_function(double weighted_sum);
+double calculate_activation_linear_function(double weighted_sum);
 
 double calculate_activation_sigmoid_function(double weighted_sum);
 
@@ -50,7 +50,7 @@ double calculate_activation_function(double weighted_sum,
 
 
 // TRAINING ____
-TrainingConfig new_training_config(int time, int max_win,
+TrainingConfig new_training_config(int epoch, int max_win,
 double learning_rate, double epsilon);
 
 Dataset new_dataset(double* inputs, int row_size, int column_size,  double* expected_outputs);

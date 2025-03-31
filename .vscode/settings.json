@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "multi_layer_perceptrons.h": "c",
+        "time.h": "c"
     }
 }

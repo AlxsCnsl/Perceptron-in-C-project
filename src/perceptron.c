@@ -8,22 +8,22 @@
 
 //INIT AND FREE____
 
-Perceptron make_perceptron(int w_size, double b, int range, ActivationFunction act_fun){
-    double *w = (double*)malloc(w_size * sizeof(double));
-    random_weight_init(w, w_size, range);
+Perceptron make_perceptron(int num_w, double bias, int range_weight, ActivationFunction function){
+    double *w = (double*)malloc(num_w * sizeof(double));
+    random_weight_init(w, num_w, range_weight);
     Perceptron perceptron;
     MALLOC_CHECK(w);
-    perceptron.weights_size = w_size;
-    perceptron.bias = b;
+    perceptron.num_weights = num_w;
+    perceptron.bias = bias;
     perceptron.weights = w;
-    perceptron.act_fun = act_fun;
+    perceptron.act_fun = function;
     return perceptron;
 }
 
 
-void random_weight_init(double* weights, int w_size, int range) {
+void random_weight_init(double* weights, int num_w, int range) {
     int i;
-    for(i=0; i<w_size; i++){
+    for(i=0; i<num_w; i++){
         weights[i] = -range + ((float)rand() / RAND_MAX) * range*2;;
     }
 }
@@ -32,7 +32,7 @@ void random_weight_init(double* weights, int w_size, int range) {
 void print_perceptron(Perceptron* perceptron){
     int i;
     printf("bias = %f \n [ ", perceptron->bias);
-    for(i=0; i< perceptron->weights_size; i++){
+    for(i=0; i< perceptron->num_weights; i++){
         printf("w%d:%f ",i, perceptron->weights[i]);
     }
     printf("]\n");
@@ -52,7 +52,7 @@ int calculate_activation_step_function(double weighted_sum){
 }
 
 
-int calculate_activation_linear_function(double weighted_sum){
+double calculate_activation_linear_function(double weighted_sum){
     return weighted_sum;
 }
 
@@ -81,10 +81,10 @@ ActivationFunction fun){
 
 // TRAINING ____
 
-TrainingConfig new_training_config(int time, int max_win,
+TrainingConfig new_training_config(int epoch, int max_win,
 double learning_rate, double epsilon){
     TrainingConfig conf;
-    conf.time = time;
+    conf.epoch = epoch;
     conf.max_win = max_win;
     conf.learning_rate = learning_rate;
     conf.epsilon = epsilon;
@@ -92,7 +92,7 @@ double learning_rate, double epsilon){
 }
 
 
-Dataset new_dataset(double* inputs, int row_size, int column_size,  double* expected_outputs){
+Dataset new_dataset(double* inputs, int row_size, int column_size,  double* expected_outputs){// À MODIFIER / RETIRER APRES MODIFS
     Dataset data;
     data.inputs = make_data_inputs(inputs, row_size, column_size);
     data.size = row_size;
@@ -104,10 +104,10 @@ Dataset new_dataset(double* inputs, int row_size, int column_size,  double* expe
 int trainPerceptron(Perceptron* p, Dataset data, TrainingConfig conf){
     int i, y, win = 0;;
     for(i = 0; i< data.size; i++){
-        double weighted_sum = compute_weighted_sum( p, data.inputs[i], p->weights_size );
+        double weighted_sum = compute_weighted_sum( p, data.inputs[i], p->num_weights );
         double actual_output = calculate_activation_function(weighted_sum, p->act_fun);
         if(!compare_outputs(actual_output, data.expected_outputs[i], conf.epsilon)){
-            for(y=0; y < p->weights_size; y++){
+            for(y=0; y < p->num_weights; y++){
                 printf("lose\n");
                 adjust_weights_bias(p, y, conf.learning_rate, data.inputs[i], data.expected_outputs[i], actual_output);
             }
@@ -127,8 +127,8 @@ int trainPerceptron(Perceptron* p, Dataset data, TrainingConfig conf){
 void multiTrainPerceptron(Perceptron* p, Dataset data, TrainingConfig conf){
     int win_counter = 0; 
     int i;
-    for(i = 0; i< conf.time; i ++){
-        printf("TIME = %d/%d\n", i, conf.time);
+    for(i = 0; i< conf.epoch; i ++){
+        printf("EPOCH = %d/%d\n", i, conf.epoch);
         if(trainPerceptron(p, data, conf) == 1){
             win_counter ++;
         }else{
@@ -157,7 +157,7 @@ void check_inputs_outputs(Perceptron* p, double xputs[], int x_size){//à modifi
         fprintf(stderr, "Erreur d'xputs NULL \n");
         exit(1);
     }
-    if(p->weights_size != x_size){
+    if(p->num_weights != x_size){
         fprintf(stderr, "Erreur de taille d'xputs \n");
         exit(1);
     }
@@ -226,7 +226,7 @@ double** make_data_inputs(double* data_inputs,  int row_size, int column_size) {
 
 double get_output_perceptron(Perceptron* p, double input[], int i_size){
     int i;
-    double weighted_sum = compute_weighted_sum( p, input, p->weights_size );
+    double weighted_sum = compute_weighted_sum( p, input, p->num_weights );
     double output = calculate_activation_function(weighted_sum, p->act_fun);
     printf("input > [%s]/ output > %f\n", input_prompt_str(input, i_size), output );
     return output;
