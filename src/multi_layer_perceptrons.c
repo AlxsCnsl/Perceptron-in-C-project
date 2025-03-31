@@ -4,11 +4,11 @@
 
 
 
-MLP new_mlp(int num_layers, Neuron** perceptrons, int* perceptron_per_layer, ActF* function_layer){
+MLP new_mlp(int num_layers, Neuron** perceptrons, int* perceptron_per_layer, ActT* function_layers){
     MLP mlp;
     mlp.num_layers = num_layers;
     mlp.perceptron_per_layer = perceptron_per_layer;
-    mlp.function_layer = function_layer;
+    mlp.function_layers = init_function_layers(function_layers, num_layers);
     mlp.perceptrons = (Perceptron**)malloc(sizeof(Perceptron**));
     //int_perceptrons(&mlp);
     return mlp;
@@ -24,10 +24,20 @@ void init_mlp_perceptrons(MLP* mlp, int num_imput, double bias, int range){//PAS
             mlp->perceptrons[i][j].bias = 0;
             mlp->perceptrons[i][j].num_weights = num_perseptron;
             mlp->perceptrons[i][j].weights = (double*)malloc(num_perseptron*sizeof(double*));//reflechie 
-            mlp->perceptrons[i][j].act_fun = mlp->function_layer[i];
+            mlp->perceptrons[i][j].act_fun = mlp->function_layers[i];
         }
     }
 }
+
+ActF* init_function_layers(ActT* type_layers, int num_layers){
+    ActF* activation_functions = (ActF*)malloc(num_layers*sizeof(ActF*));
+    int i;
+    for(i=0; i<num_layers; i++){
+        activation_functions[i] = init_activation_function(type_layers[i]);
+    }
+}
+
+
 
 void train_mlp(MLP* mlp, TrainingConfig conf, Dataset datas){
     int layer;

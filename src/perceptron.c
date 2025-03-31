@@ -8,7 +8,7 @@
 
 //INIT AND FREE____
 
-Perceptron make_perceptron(int num_w, double bias, int range_weight, ActivationFunction function){
+Perceptron make_perceptron(int num_w, double bias, int range_weight, ActivationType act_type){
     double *w = (double*)malloc(num_w * sizeof(double));
     random_weight_init(w, num_w, range_weight);
     Perceptron perceptron;
@@ -16,10 +16,31 @@ Perceptron make_perceptron(int num_w, double bias, int range_weight, ActivationF
     perceptron.num_weights = num_w;
     perceptron.bias = bias;
     perceptron.weights = w;
-    perceptron.act_fun = function;
+    perceptron.act_fun = init_activation_function(act_type);
     return perceptron;
 }
 
+ActivationFunction init_activation_function(ActivationType act_type){
+    ActivationFunction act_fun;
+    switch (act_type){
+        case ACTIVATION_STEP:
+            act_fun.activation = step;
+            act_fun.activation_prime = step_prime;
+            break;
+        case ACTIVATION_LINEAR:
+            act_fun.activation = linear;
+            act_fun.activation_prime = linear_prime;
+            break;
+        case ACTIVATION_SIGMOID:
+            act_fun.activation = sigmoid;
+            act_fun.activation_prime = sigmoid_prime;
+            break;
+        default:
+            fprintf(stderr, "Erreur: Fonction d'activation non supportée.\n");
+            exit(1);
+    }
+    return act_fun;
+}
 
 void random_weight_init(double* weights, int num_w, int range) {
     int i;
@@ -47,34 +68,28 @@ void free_perceptron(Perceptron* perceptron){
 
 // CALCULATE_ACTIVATION ____
 
-int calculate_activation_step_function(double weighted_sum){
-    return (weighted_sum > 0) ? 1 : 0;
+double step(double x) {
+    return (x >= 0) ? 1.0 : 0.0;
+}
+double step_prime(double x) {
+    return 1.0; // 0 generate an error 
 }
 
 
-double calculate_activation_linear_function(double weighted_sum){
-    return weighted_sum;
+double sigmoid(double x) {
+    return 1.0 / (1.0 + exp(-x));
+}
+double sigmoid_prime(double x) {
+    double s = sigmoid(x);
+    return s * (1 - s);
 }
 
 
-double calculate_activation_sigmoid_function(double weighted_sum){
-    return (1/(1+exp(-weighted_sum)));
+double linear(double x) {
+    return x;
 }
-
-
-double calculate_activation_function(double weighted_sum,
-ActivationFunction fun){
-    switch (fun){
-    case ACTIVATION_STEP:
-        return calculate_activation_step_function(weighted_sum);
-    case ACTIVATION_LINEAR:
-        return calculate_activation_linear_function(weighted_sum);
-    case ACTIVATION_SIGMOID:
-        return calculate_activation_sigmoid_function(weighted_sum);
-    default:
-        fprintf(stderr, "Erreur: Fonction d'activation non supportée.\n");
-        exit(1);
-    }
+double linear_prime(double x) {
+    return 1.0;
 }
 
 
@@ -102,10 +117,10 @@ Dataset new_dataset(double* inputs, int row_size, int column_size,  double* expe
 
 
 int trainPerceptron(Perceptron* p, Dataset data, TrainingConfig conf){
-    int i, y, win = 0;;
+    int i, y, win = 0;
     for(i = 0; i< data.size; i++){
         double weighted_sum = compute_weighted_sum( p, data.inputs[i], p->num_weights );
-        double actual_output = calculate_activation_function(weighted_sum, p->act_fun);
+        double actual_output = p->act_fun.activation(weighted_sum);
         if(!compare_outputs(actual_output, data.expected_outputs[i], conf.epsilon)){
             for(y=0; y < p->num_weights; y++){
                 printf("lose\n");
@@ -166,35 +181,13 @@ void check_inputs_outputs(Perceptron* p, double xputs[], int x_size){//à modifi
 
 void adjust_weights_bias(Perceptron* p, int w_index, double learning_rate,
 double input[],  double expected_output, double actual_output){
-    switch (p->act_fun){
-        case ACTIVATION_STEP:
-            return adjust_weigths_bias_step_linear(p, w_index, learning_rate, input, expected_output, actual_output);
-        case ACTIVATION_LINEAR:
-            return adjust_weigths_bias_step_linear(p, w_index, learning_rate, input, expected_output, actual_output);
-        case ACTIVATION_SIGMOID:
-            return adjust_weigths_bias_sigmoid(p, w_index, learning_rate, input, expected_output, actual_output);
-        default:
-            fprintf(stderr, "Erreur: Fonction d'activation non supportée.\n");
-            exit(1);
-        }
+    double delta = (expected_output - actual_output);
+    double prime = p->act_fun.activation_prime(actual_output);
+    p->weights[w_index] = p->weights[w_index] + learning_rate * delta * prime * input[w_index];
+    p->bias = p->bias + delta * prime;
 }
 
 
-void adjust_weigths_bias_step_linear(Perceptron* p, int w_index, double learning_rate,
-double input[], double expected_output, double actual_output ){
-    double error = expected_output - actual_output;
-    p->weights[w_index] = p->weights[w_index] + learning_rate * error * input[w_index];
-    p->bias = p->bias + error;
-}
-
-
-void adjust_weigths_bias_sigmoid(Perceptron* p, int w_index, double learning_rate,
-double input[], double expected_output, double actual_output){
-    double error = expected_output - actual_output;
-    double sigmo_prime = actual_output*(1-actual_output);
-    p->weights[w_index] = p->weights[w_index] + learning_rate * error * sigmo_prime * input[w_index];
-    p->bias = p->bias + error * sigmo_prime;
-}
 
 
     
@@ -221,13 +214,12 @@ double** make_data_inputs(double* data_inputs,  int row_size, int column_size) {
 }
 
 
-
-//PROMPT
+//PROMPT _____
 
 double get_output_perceptron(Perceptron* p, double input[], int i_size){
     int i;
     double weighted_sum = compute_weighted_sum( p, input, p->num_weights );
-    double output = calculate_activation_function(weighted_sum, p->act_fun);
+    double output = p->act_fun.activation(weighted_sum);
     printf("input > [%s]/ output > %f\n", input_prompt_str(input, i_size), output );
     return output;
 }

@@ -7,7 +7,7 @@ int main(void){
     srand(time(NULL));
 
     //DATA_______________________________________________________________________________
-    int row_size = 15, column_size =1;
+    int row_size = 10, column_size =1;
     double data_inputs[] = {
         0, 
         1,
@@ -36,7 +36,7 @@ int main(void){
     //TRAINING_______________________________________________________________________________
     Perceptron perceptron = make_perceptron(1, 0, 0.1, ACTIVATION_LINEAR);
     print_perceptron(&perceptron);
-    TrainingConfig conf = new_training_config(10000000, 100, 0.00000001, 0.001);
+    TrainingConfig conf = new_training_config(10000000, 100, 0.001, 0.0001);
     multiTrainPerceptron(&perceptron, data, conf);
     print_perceptron(&perceptron);
 

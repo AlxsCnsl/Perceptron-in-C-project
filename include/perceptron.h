@@ -5,7 +5,12 @@ typedef enum{
     ACTIVATION_STEP,
     ACTIVATION_LINEAR,
     ACTIVATION_SIGMOID,
-} ActivationFunction;
+} ActivationType;
+
+typedef struct{
+    double (*activation)(double);
+    double (*activation_prime)(double);
+}ActivationFunction;
 
 typedef struct {
     int num_weights;
@@ -29,7 +34,9 @@ typedef struct{
 
 
 //INIT AND FREE ____
-Perceptron make_perceptron(int num_weights, double b, int range_weight, ActivationFunction act_fun);
+Perceptron make_perceptron(int num_weights, double b, int range_weight, ActivationType act_type); //USED
+
+ActivationFunction init_activation_function(ActivationType act_type);//NEW
 
 void random_weight_init(double *weights, int num_weights, int range);
 
@@ -39,14 +46,17 @@ void free_perceptron(Perceptron *perceptron);
 
 
 // CALCULATE_ACTIVATION ____
-int calculate_activation_step_function(double weighted_sum);
 
-double calculate_activation_linear_function(double weighted_sum);
+double step(double x);
+double step_prime(double x);
 
-double calculate_activation_sigmoid_function(double weighted_sum);
 
-double calculate_activation_function(double weighted_sum,
-    ActivationFunction fun);
+double sigmoid(double x);
+double sigmoid_prime(double x);
+
+
+double linear(double x);
+double linear_prime(double x);
 
 
 // TRAINING ____
@@ -64,12 +74,6 @@ double compute_weighted_sum(Perceptron* p, double inputs[], int i_size);
 void check_inputs_outputs(Perceptron* p, double xputs[], int i_size);
 
 void adjust_weights_bias(Perceptron* p, int w_index, double learning_rate,
-    double input[],  double expected_output, double actual_output );
-
-void adjust_weigths_bias_sigmoid(Perceptron* p, int w_index, double learning_rate,
-    double input[],  double expected_output, double actual_output);
-
-void adjust_weigths_bias_step_linear(Perceptron* p, int w_index, double learning_rate,
     double input[],  double expected_output, double actual_output );
 
 int compare_outputs(double expected_output, double actual_output,
