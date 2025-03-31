@@ -181,18 +181,18 @@ double input[],  double expected_output, double actual_output){
 
 
 void adjust_weigths_bias_step_linear(Perceptron* p, int w_index, double learning_rate,
-double input[],  double expected_output, double actual_output ){
-    double error = learning_rate * (expected_output - actual_output);
-    p->weights[w_index] = p->weights[w_index] + error * input[w_index];
+double input[], double expected_output, double actual_output ){
+    double error = expected_output - actual_output;
+    p->weights[w_index] = p->weights[w_index] + learning_rate * error * input[w_index];
     p->bias = p->bias + error;
 }
 
 
 void adjust_weigths_bias_sigmoid(Perceptron* p, int w_index, double learning_rate,
-double input[],  double expected_output, double actual_output){
-    double error = learning_rate * (expected_output - actual_output);
+double input[], double expected_output, double actual_output){
+    double error = expected_output - actual_output;
     double sigmo_prime = actual_output*(1-actual_output);
-    p->weights[w_index] = p->weights[w_index] + error * sigmo_prime * input[w_index];
+    p->weights[w_index] = p->weights[w_index] + learning_rate * error * sigmo_prime * input[w_index];
     p->bias = p->bias + error * sigmo_prime;
 }
 
