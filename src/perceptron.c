@@ -115,8 +115,9 @@ int trainPerceptron(Perceptron* p, Dataset data, TrainingConfig conf){
             printf("win\n");
             win ++;
         }
-    } double winrate = (win / data.size) * 100;
+    } double winrate = ((double)win / data.size) * 100;
     printf("WINRATE : %f %%\n", winrate);
+    print_perceptron(p);//TEST ICI
     if(winrate == 100.0){
         return 1;
     }
@@ -127,7 +128,7 @@ void multiTrainPerceptron(Perceptron* p, Dataset data, TrainingConfig conf){
     int win_counter = 0; 
     int i;
     for(i = 0; i< conf.time; i ++){
-        printf("TIME = %d/%d", i, conf.time);
+        printf("TIME = %d/%d\n", i, conf.time);
         if(trainPerceptron(p, data, conf) == 1){
             win_counter ++;
         }else{
@@ -164,11 +165,37 @@ void check_inputs_outputs(Perceptron* p, double xputs[], int x_size){//à modifi
 
 
 void adjust_weights_bias(Perceptron* p, int w_index, double learning_rate,
+double input[],  double expected_output, double actual_output){
+    switch (p->act_fun){
+        case ACTIVATION_STEP:
+            return adjust_weigths_bias_step_linear(p, w_index, learning_rate, input, expected_output, actual_output);
+        case ACTIVATION_LINEAR:
+            return adjust_weigths_bias_step_linear(p, w_index, learning_rate, input, expected_output, actual_output);
+        case ACTIVATION_SIGMOID:
+            return adjust_weigths_bias_sigmoid(p, w_index, learning_rate, input, expected_output, actual_output);
+        default:
+            fprintf(stderr, "Erreur: Fonction d'activation non supportée.\n");
+            exit(1);
+        }
+}
+
+
+void adjust_weigths_bias_step_linear(Perceptron* p, int w_index, double learning_rate,
 double input[],  double expected_output, double actual_output ){
     double error = learning_rate * (expected_output - actual_output);
     p->weights[w_index] = p->weights[w_index] + error * input[w_index];
     p->bias = p->bias + error;
 }
+
+
+void adjust_weigths_bias_sigmoid(Perceptron* p, int w_index, double learning_rate,
+double input[],  double expected_output, double actual_output){
+    double error = learning_rate * (expected_output - actual_output);
+    double sigmo_prime = actual_output*(1-actual_output);
+    p->weights[w_index] = p->weights[w_index] + error * sigmo_prime * input[w_index];
+    p->bias = p->bias + error * sigmo_prime;
+}
+
 
     
 int compare_outputs(double expected_output, double actual_output,

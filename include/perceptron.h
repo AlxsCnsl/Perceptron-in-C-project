@@ -66,6 +66,12 @@ void check_inputs_outputs(Perceptron* p, double xputs[], int i_size);
 void adjust_weights_bias(Perceptron* p, int w_index, double learning_rate,
     double input[],  double expected_output, double actual_output );
 
+void adjust_weigths_bias_sigmoid(Perceptron* p, int w_index, double learning_rate,
+    double input[],  double expected_output, double actual_output);
+
+void adjust_weigths_bias_step_linear(Perceptron* p, int w_index, double learning_rate,
+    double input[],  double expected_output, double actual_output );
+
 int compare_outputs(double expected_output, double actual_output,
     double epsilon);
 
